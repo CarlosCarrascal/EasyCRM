@@ -1,0 +1,121 @@
+{% extends 'CRMapp/base.html' %}
+
+{% block title %}{{ producto.nombre }} - EasyCRM{% endblock %}
+
+{% block page_title %}Detalle del Producto{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8">
+    <div class="p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">{{ producto.nombre }}</h2>
+            <div class="flex space-x-2">
+                <a href="{% url 'producto-update' producto.id %}" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:scale-105">
+                    <i class="fas fa-edit mr-2"></i> Editar
+                </a>
+                <a href="{% url 'producto-delete' producto.id %}" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:scale-105">
+                    <i class="fas fa-trash-alt mr-2"></i> Eliminar
+                </a>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-dollar-sign text-green-500 dark:text-green-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Precio</p>
+                        <p class="text-2xl font-bold text-gray-700 dark:text-gray-200">${{ producto.precio }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-6">
+            <div class="flex items-start">
+                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3 flex-shrink-0">
+                    <i class="fas fa-align-left text-blue-500 dark:text-blue-300"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Descripción</p>
+                    <p class="text-gray-700 dark:text-gray-200">{{ producto.descripcion }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pedidos que incluyen este producto -->
+<div class="mt-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Pedidos con este Producto</h3>
+        <a href="{% url 'pedido-create' %}?producto={{ producto.id }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:scale-105">
+            <i class="fas fa-plus mr-2"></i> Nuevo Pedido
+        </a>
+    </div>
+    
+    {% if producto.pedidos.all %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
+                            <th class="py-3 px-6 text-left">ID</th>
+                            <th class="py-3 px-6 text-left">Cliente</th>
+                            <th class="py-3 px-6 text-left">Cantidad</th>
+                            <th class="py-3 px-6 text-left">Fecha</th>
+                            <th class="py-3 px-6 text-left">Estado</th>
+                            <th class="py-3 px-6 text-left">Total</th>
+                            <th class="py-3 px-6 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for pedido in producto.pedidos.all %}
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <td class="py-3 px-6 text-left">{{ pedido.id }}</td>
+                                <td class="py-3 px-6 text-left">{{ pedido.cliente.nombre }}</td>
+                                <td class="py-3 px-6 text-left">{{ pedido.cantidad }}</td>
+                                <td class="py-3 px-6 text-left">{{ pedido.fecha|date:"d/m/Y H:i" }}</td>
+                                <td class="py-3 px-6 text-left">
+                                    <span class="{% if pedido.estado == 'pendiente' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300{% elif pedido.estado == 'en_proceso' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300{% elif pedido.estado == 'completado' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %} py-1 px-3 rounded-full text-xs">
+                                        {{ pedido.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-6 text-left">${{ pedido.total }}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <div class="flex item-center justify-center">
+                                        <a href="{% url 'pedido-detail' pedido.id %}" class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 transition-all">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'pedido-update' pedido.id %}" class="w-4 mr-2 transform hover:text-yellow-500 hover:scale-110 transition-all">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'pedido-delete' pedido.id %}" class="w-4 transform hover:text-red-500 hover:scale-110 transition-all">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+            <p class="text-gray-500 dark:text-gray-400 mb-4">Este producto no tiene pedidos registrados.</p>
+            <a href="{% url 'pedido-create' %}?producto={{ producto.id }}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300 inline-flex items-center shadow-md hover:shadow-lg transform hover:scale-105">
+                <i class="fas fa-plus mr-2"></i> Crear Pedido
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="mt-6">
+    <a href="{% url 'producto-list' %}" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center">
+        <i class="fas fa-arrow-left mr-1"></i> Volver a la lista de productos
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'CRMapp/base.html' %}
+
+{% block title %}{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Pedido - EasyCRM{% endblock %}
+
+{% block page_title %}{% if form.instance.id %}Editar Pedido{% else %}Nuevo Pedido{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+        <div class="md:flex">
+            <!-- Formulario -->
+            <div class="md:w-2/3 p-6">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-4">
+                            <p class="font-bold">Por favor corrige los siguientes errores:</p>
+                            <ul class="list-disc list-inside mt-2">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Cliente -->
+                        <div>
+                            <label for="{{ form.cliente.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Cliente <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-user text-gray-400"></i>
+                                </div>
+                                {{ form.cliente }}
+                            </div>
+                            {% if form.cliente.help_text %}
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.cliente.help_text }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Producto -->
+                        <div>
+                            <label for="{{ form.producto.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Producto <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-box text-gray-400"></i>
+                                </div>
+                                {{ form.producto }}
+                            </div>
+                            {% if form.producto.help_text %}
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.producto.help_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Cantidad -->
+                        <div>
+                            <label for="{{ form.cantidad.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Cantidad <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-sort-numeric-up text-gray-400"></i>
+                                </div>
+                                {{ form.cantidad }}
+                            </div>
+                            {% if form.cantidad.help_text %}
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.cantidad.help_text }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Estado -->
+                        <div>
+                            <label for="{{ form.estado.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Estado <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-tasks text-gray-400"></i>
+                                </div>
+                                {{ form.estado }}
+                            </div>
+                            {% if form.estado.help_text %}
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ form.estado.help_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <a href="{% url 'pedido-list' %}" class="inline-flex justify-center items-center py-2.5 px-5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-300">
+                            <i class="fas fa-times mr-2"></i> Cancelar
+                        </a>
+                        <button type="submit" class="inline-flex justify-center items-center py-2.5 px-5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 transform hover:scale-105">
+                            <i class="fas fa-save mr-2"></i> {% if form.instance.id %}Actualizar{% else %}Guardar{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Panel lateral con información o ayuda -->
+            <div class="md:w-1/3 bg-blue-50 dark:bg-blue-900/20 p-6 flex flex-col">
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-blue-800 dark:text-blue-300 mb-2">
+                        <i class="fas fa-info-circle mr-2"></i> Información
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Complete todos los campos marcados con <span class="text-red-500">*</span> para {% if form.instance.id %}actualizar{% else %}registrar{% endif %} el pedido en el sistema.
+                    </p>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-blue-800 dark:text-blue-300 mb-2">
+                        <i class="fas fa-lightbulb mr-2"></i> Consejos
+                    </h3>
+                    <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            <span>Seleccione el cliente y producto correspondiente.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            <span>Verifique la cantidad antes de guardar.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                            <span>El total se calculará automáticamente basado en el precio del producto y la cantidad.</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                {% if form.instance.id %}
+                    <div class="mt-auto pt-6 border-t border-blue-200 dark:border-blue-800">
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                            <i class="fas fa-calendar-alt mr-2"></i> Fecha de creación: 
+                            <span class="font-medium ml-1">{{ form.instance.fecha|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-dollar-sign mr-2"></i> Total: 
+                            <span class="font-medium ml-1">${{ form.instance.total }}</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para estilizar los inputs -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Estilizar los inputs
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="email"]');
+        inputs.forEach(input => {
+            input.classList.add('pl-10', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'shadow-sm', 'focus:border-blue-500', 'focus:ring', 'focus:ring-blue-500', 'focus:ring-opacity-50', 'dark:bg-gray-700', 'dark:text-white');
+        });
+        
+        // Estilizar los selects
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.classList.add('pl-10', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'shadow-sm', 'focus:border-blue-500', 'focus:ring', 'focus:ring-blue-500', 'focus:ring-opacity-50', 'dark:bg-gray-700', 'dark:text-white');
+        });
+    });
+</script>
+{% endblock %}

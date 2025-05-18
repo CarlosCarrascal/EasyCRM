@@ -1,0 +1,101 @@
+{% extends 'CRMapp/base.html' %}
+
+{% block title %}Eliminar Pedido - EasyCRM{% endblock %}
+
+{% block page_title %}Eliminar Pedido{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden w-full mx-auto">
+    <div class="p-6">
+        <div class="flex flex-col items-center text-center mb-8">
+            <div class="flex-shrink-0 flex items-center justify-center w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 mb-4">
+                <i class="fas fa-exclamation-triangle text-3xl"></i>
+            </div>
+            <div class="flex-grow">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">¿Estás seguro?</h2>
+                <p class="text-gray-600 dark:text-gray-300">
+                    Estás a punto de eliminar el pedido <span class="font-semibold">#{{ object.id }}</span>.
+                    <br>Esta acción no se puede deshacer.
+                </p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-5 mb-6">
+            <h3 class="text-md font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
+                <i class="fas fa-info-circle mr-2 text-blue-500 dark:text-blue-400"></i>
+                Información del pedido
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-user text-blue-500 dark:text-blue-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Cliente</p>
+                        <p class="text-gray-700 dark:text-gray-200">{{ object.cliente.nombre }}</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-box text-purple-500 dark:text-purple-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Producto</p>
+                        <p class="text-gray-700 dark:text-gray-200">{{ object.producto.nombre }}</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-sort-numeric-up text-green-500 dark:text-green-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Cantidad</p>
+                        <p class="text-gray-700 dark:text-gray-200">{{ object.cantidad }}</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-calendar-alt text-yellow-500 dark:text-yellow-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Fecha</p>
+                        <p class="text-gray-700 dark:text-gray-200">{{ object.fecha|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-tasks text-indigo-500 dark:text-indigo-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Estado</p>
+                        <p class="text-gray-700 dark:text-gray-200">
+                            <span class="{% if object.estado == 'pendiente' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300{% elif object.estado == 'en_proceso' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300{% elif object.estado == 'completado' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %} py-1 px-3 rounded-full text-xs">
+                                {{ object.get_estado_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-dollar-sign text-red-500 dark:text-red-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                        <p class="text-gray-700 dark:text-gray-200">${{ object.total }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form method="post" class="flex flex-col sm:flex-row justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            {% csrf_token %}
+            <a href="{% url 'pedido-detail' object.id %}" class="inline-flex justify-center items-center py-2.5 px-5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-300">
+                <i class="fas fa-times mr-2"></i> Cancelar
+            </a>
+            <button type="submit" class="inline-flex justify-center items-center py-2.5 px-5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300 transform hover:scale-105">
+                <i class="fas fa-trash-alt mr-2"></i> Eliminar Definitivamente
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

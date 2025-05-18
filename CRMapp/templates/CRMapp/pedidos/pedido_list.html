@@ -1,0 +1,192 @@
+{% extends 'CRMapp/base.html' %}
+
+{% block title %}Pedidos - EasyCRM{% endblock %}
+
+{% block page_title %}Gestión de Pedidos{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden mb-8">
+    <div class="p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <div class="flex items-center">
+                <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium px-3 py-1.5 rounded-full">
+                    Total: {{ paginator.count }}
+                </span>
+                <div class="relative ml-4">
+                    <input type="text" id="search-pedidos" placeholder="Buscar pedido..." 
+                           class="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <div class="relative">
+                    <select id="filter-estado" class="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm appearance-none">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_proceso">En proceso</option>
+                        <option value="completado">Completado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <i class="fas fa-filter text-gray-400"></i>
+                    </div>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+                <a href="{% url 'pedido-create' %}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i> Nuevo Pedido
+                </a>
+            </div>
+        </div>
+
+        {% if pedidos %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
+                            <th class="py-3 px-6 text-left">ID</th>
+                            <th class="py-3 px-6 text-left">Cliente</th>
+                            <th class="py-3 px-6 text-left">Producto</th>
+                            <th class="py-3 px-6 text-left">Cantidad</th>
+                            <th class="py-3 px-6 text-left">Fecha</th>
+                            <th class="py-3 px-6 text-left">Estado</th>
+                            <th class="py-3 px-6 text-right">Total</th>
+                            <th class="py-3 px-6 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for pedido in pedidos %}
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <td class="py-4 px-6 text-left whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">#{{ pedido.id }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-left whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">{{ pedido.cliente.nombre }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-left whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">{{ pedido.producto.nombre }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-left whitespace-nowrap">
+                                    <div class="text-sm text-gray-900 dark:text-white">{{ pedido.cantidad }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-left whitespace-nowrap">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ pedido.fecha|date:"d/m/Y H:i" }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-left whitespace-nowrap">
+                                    <span class="{% if pedido.estado == 'pendiente' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300{% elif pedido.estado == 'en_proceso' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300{% elif pedido.estado == 'completado' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %} py-1 px-3 rounded-full text-xs">
+                                        {{ pedido.get_estado_display }}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6 text-right whitespace-nowrap">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">${{ pedido.total }}</div>
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    <div class="flex items-center justify-center space-x-3">
+                                        <a href="{% url 'pedido-detail' pedido.id %}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200" title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'pedido-update' pedido.id %}" class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 transition-colors duration-200" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'pedido-delete' pedido.id %}" class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200" title="Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            {% if is_paginated %}
+                <div class="flex justify-center mt-6">
+                    <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Paginación">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <a href="?page={{ num }}" aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-50 dark:bg-blue-900 text-sm font-medium text-blue-700 dark:text-blue-200">
+                                    {{ num }}
+                                </a>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-300 mb-4">
+                    <i class="fas fa-clipboard-list text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No hay pedidos registrados</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-6">Comienza agregando tu primer pedido al sistema</p>
+                <a href="{% url 'pedido-create' %}" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg transition duration-300 inline-flex items-center shadow-md hover:shadow-lg transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i> Crear Pedido
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Script para búsqueda y filtrado de pedidos -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search-pedidos');
+        const filterEstado = document.getElementById('filter-estado');
+        const rows = document.querySelectorAll('tbody tr');
+        
+        function filterTable() {
+            const searchText = searchInput.value.toLowerCase();
+            const estadoFilter = filterEstado.value.toLowerCase();
+            
+            rows.forEach(row => {
+                const id = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                const cliente = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const producto = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const estado = row.querySelector('td:nth-child(6) span').textContent.toLowerCase();
+                const estadoClass = row.querySelector('td:nth-child(6) span').className.toLowerCase();
+                
+                const matchesSearch = id.includes(searchText) || 
+                                     cliente.includes(searchText) || 
+                                     producto.includes(searchText);
+                
+                const matchesEstado = estadoFilter === '' || estadoClass.includes(estadoFilter);
+                
+                if (matchesSearch && matchesEstado) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        searchInput.addEventListener('keyup', filterTable);
+        filterEstado.addEventListener('change', filterTable);
+    });
+</script>
+{% endblock %}

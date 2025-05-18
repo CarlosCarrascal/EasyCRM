@@ -1,0 +1,285 @@
+{% extends 'CRMapp/base.html' %}
+
+{% block title %}{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Producto - EasyCRM{% endblock %}
+
+{% block page_title %}{% if form.instance.id %}Editar Producto{% else %}Nuevo Producto{% endif %}{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+    <div class="flex flex-col lg:flex-row">
+        <!-- Panel principal -->
+        <div class="flex-1 p-6">
+            <div class="max-w-3xl mx-auto">
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-4">
+                            <p class="font-bold">Por favor corrige los siguientes errores:</p>
+                            <ul class="list-disc list-inside mt-2">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Columna izquierda -->
+                        <div class="lg:col-span-1 space-y-6">
+                            <!-- Imagen -->
+                            <!-- Imagen -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Imagen del Producto
+                                </label>
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-300">
+                                    <!-- Área de previsualización - solo visible cuando hay imagen -->
+                                    <div id="image-preview" class="space-y-1 text-center w-full {% if not form.instance.imagen %}hidden{% endif %}">
+                                        <div class="relative inline-block">
+                                            <img id="preview-img" src="{% if form.instance.imagen %}{{ form.instance.imagen.url }}{% endif %}" alt="Preview" class="mx-auto h-40 w-auto object-contain rounded-lg border border-gray-300 dark:border-gray-600">
+                                            <button type="button" id="remove-image" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 transition">
+                                                <span class="sr-only">Eliminar imagen</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                            <!-- SIEMPRE presente en el formulario, aunque oculto -->
+                                            <input type="checkbox" name="{{ form.imagen.clear_checkbox_name }}" id="clear-image-hidden" class="hidden">
+                                        </div>
+                                        <p id="preview-filename" class="text-sm text-gray-500 dark:text-gray-400 mt-2">{% if form.instance.imagen %}{{ form.instance.imagen.name }}{% endif %}</p>
+                                    </div>
+                                    
+                                    <!-- Área de subida - solo visible cuando NO hay imagen -->
+                                    <div class="preview-container space-y-1 text-center w-full {% if form.instance.imagen %}hidden{% endif %}">
+                                        <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-3"></i>
+                                        <div class="flex flex-col items-center text-sm text-gray-600 dark:text-gray-400">
+                                            <label for="{{ form.imagen.id_for_label }}" class="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 px-3 py-1.5 mb-2">
+                                                <span>Seleccionar archivo</span>
+                                                <span class="hidden">{{ form.imagen }}</span>
+                                            </label>
+                                            <p class="mt-1">o arrastra y suelta</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF hasta 10MB</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Precio -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                <label for="{{ form.precio.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Precio <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-dollar-sign text-gray-400"></i>
+                                    </div>
+                                    {{ form.precio }}
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Precio en dólares sin impuestos</p>
+                            </div>
+                        </div>
+
+                        <!-- Columna derecha -->
+                        <div class="lg:col-span-1 space-y-6">
+                            <!-- Nombre -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                <label for="{{ form.nombre.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Nombre <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-tag text-gray-400"></i>
+                                    </div>
+                                    {{ form.nombre }}
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                                <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Descripción
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute top-3 left-0 pl-3 flex items-start pointer-events-none">
+                                        <i class="fas fa-align-left text-gray-400"></i>
+                                    </div>
+                                    {{ form.descripcion }}
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Describe las características principales del producto</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+                        <a href="{% url 'producto-list' %}" class="inline-flex justify-center items-center py-2.5 px-5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-300">
+                            <i class="fas fa-arrow-left mr-2"></i> Volver
+                        </a>
+                        <button type="submit" class="inline-flex justify-center items-center py-2.5 px-5 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 transform hover:scale-105">
+                            <i class="fas fa-save mr-2"></i> {% if form.instance.id %}Actualizar{% else %}Guardar{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="lg:w-80 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6">
+            <div class="sticky top-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3">
+                        <i class="fas fa-box text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        {% if form.instance.id %}
+                            Editando producto
+                        {% else %}
+                            Nuevo producto
+                        {% endif %}
+                    </h3>
+                </div>
+                
+                <div class="prose prose-sm dark:prose-invert">
+                    <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        {% if form.instance.id %}
+                            Estás editando la información del producto <strong>{{ form.instance.nombre }}</strong>.
+                        {% else %}
+                            Completa el formulario para agregar un nuevo producto al catálogo.
+                        {% endif %}
+                    </p>
+                    
+                    <div class="bg-white dark:bg-gray-700/50 rounded-lg p-4 mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">Consejos:</h4>
+                        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Usa nombres descriptivos y claros</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Incluye una imagen de buena calidad</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Detalla las características principales</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <span>Verifica que el precio sea correcto</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-info-circle text-blue-500 dark:text-blue-400 mr-2"></i>
+                        <p>Los campos marcados con <span class="text-red-500">*</span> son obligatorios</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para previsualización de imagen -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.querySelector('input[type="file"]');
+        const previewContainer = document.querySelector('.preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const previewFilename = document.getElementById('preview-filename');
+        const removeBtn = document.getElementById('remove-image');
+        const clearCheckbox = document.getElementById('clear-image-hidden');
+        const dropZone = document.querySelector('.border-dashed');
+
+        // Estilizar los inputs
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], textarea');
+        inputs.forEach(input => {
+            input.classList.add('pl-10', 'block', 'w-full', 'rounded-md', 'border-gray-300', 'dark:border-gray-600', 'shadow-sm', 'focus:border-blue-500', 'focus:ring', 'focus:ring-blue-500', 'focus:ring-opacity-50', 'dark:bg-gray-700', 'dark:text-white');
+        });
+
+        // Ocultar input de archivo original
+        imageInput.classList.add('sr-only');
+
+        // Función para mostrar la previsualización
+        function showPreview(file) {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewFilename.textContent = file.name;
+                    previewContainer.classList.add('hidden');
+                    imagePreview.classList.remove('hidden');
+                    if (clearCheckbox) clearCheckbox.checked = false;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Función para eliminar la imagen
+        function removeImage() {
+            const clearCheckbox = document.getElementById('clear-image-hidden');
+            if (clearCheckbox) clearCheckbox.checked = true;
+            imageInput.value = '';
+            previewImg.src = '';
+            previewFilename.textContent = '';
+            imagePreview.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+        }
+        
+        // Evento para cuando se selecciona un archivo
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                showPreview(file);
+            }
+        });
+        
+        // Eventos para drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropZone.classList.add('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
+        }
+        
+        function unhighlight() {
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50', 'dark:bg-blue-900/20');
+        }
+        
+        dropZone.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            
+            if (file) {
+                imageInput.files = dt.files;
+                showPreview(file);
+            }
+        }
+        
+        // Agregar evento al botón de eliminar
+        if (removeBtn) {
+            removeBtn.addEventListener('click', removeImage);
+        }
+    });
+</script>
+{% endblock %}
